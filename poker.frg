@@ -75,6 +75,10 @@ sig Hand {
     card2: one Card
 }
 
+one sig Table {
+    dealt: set Card
+}
+
 one sig Deck {
     cards: set Card,
     size: one Int
@@ -107,13 +111,6 @@ pred wellformed_deck {
 // Check for wellformed hands
 pred wellformed_hands {
     -- Check that each hand is wellformed
-    all h: Hand | {
-        -- Check that cards are in the deck
-        // h.card1 in Deck.cards
-        // h.card2 in Deck.cards
-        -- Check that cards are different
-        different[h.card1, h.card2]
-    }
     -- Check that the cards between hands are different
     all disj h1, h2: Hand | {
         different[h1.card1, h2.card1]
@@ -121,6 +118,33 @@ pred wellformed_hands {
         different[h1.card2, h2.card1]
         different[h1.card2, h2.card2]
     }
+    -- Check that the cards are not dealt on the table
+    all h: Hand | {
+        h.card1 not in Table.dealt
+        h.card2 not in Table.dealt
+    }
+}
+
+// Check for wellformed table
+pred wellformed_table {
+    #{c : Card | c in Table.dealt} > 2
+    #{c : Card | c in Table.dealt} < 6
+    -- Check for no duplicate cards
+    all disj c1, c2: Card | {
+        (c1 in Table.dealt and c2 in Table.dealt) => different[c1, c2]
+    }
+}
+
+// Deal cards to each player
+pred deal[num_players: Int] {
+    #{Hand} = num_players
+    wellformed_hands
+}
+
+// Flop the first three cards
+pred flop {
+    #{c : Card | c in Table.dealt} = 3
+    wellformed_table
 }
 
 // Set the cards in the deck
@@ -191,8 +215,9 @@ pred Values {
 // Initialize the game
 pred init {
     wellformed_deck
-    wellformed_hands
     Values
+    flop
+    deal[3]
 }
 
 run {init} for 7 Int
