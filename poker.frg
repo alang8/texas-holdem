@@ -10,6 +10,17 @@ abstract sig Card {
     rank: one Int
 }
 
+// abstract sig Rank {}
+// one sig Two, Three, Four, Five, Six, Seven, Nine, Ten, Jack, Queen, King, Ace extends Rank {}
+ 
+// abstract sig Suit {}
+// one sig Clubs, Diamonds, Hearts, Spades extends Suit {}
+
+// sig Card {
+//     suit: one Rank,
+//     rank: one Suit
+// }
+
 // Hearts
 one sig HA extends Card {}
 one sig H2 extends Card {}
@@ -71,8 +82,7 @@ one sig SQ extends Card {}
 one sig SK extends Card {}
 
 sig Hand {
-    card1: one Card,
-    card2: one Card
+    hcards: set Card
 }
 
 one sig Table {
@@ -80,59 +90,58 @@ one sig Table {
 }
 
 one sig Deck {
-    cards: set Card,
-    size: one Int
+    cards: set Card
 }
 
 -- Game operations
 
 // What makes two cards different
-pred different[c1, c2: Card] {
-    c1.suit != c2.suit or c1.rank != c2.rank
+pred different[cards: set Card] {
+    all disj c1, c2: cards | {
+        c1.suit != c2.suit or c1.rank != c2.rank
+    }
 }
+
+// Get the highest card from a hand
+// fun highest_card[h: Hand] : Card {
+//     h.card1.rank > h.card2.rank => h.card1
+//     h.card2.rank > h.card1.rank => h.card2
+//     h.card1.rank = h.card2.rank => h.card1
+// }
 
 // Check for wellformed deck
 pred wellformed_deck {
-    -- Check for correct size
-    Deck.size = 52
-    -- Check for correct card suits/ranks
-    all c: Card | {
-        c in Deck.cards
-        c.suit > 0 and c.suit < 5
-        c.rank > 0 and c.rank < 14
+    -- Check that the cards in hands/table are not in the deck
+    all c: Card - Hand.hcards - Table.dealt | {
+        c in Deck.cards 
     }
     -- Check for no duplicate cards
-    all disj c1, c2: Card | {
-        c1 in Deck.cards and c2 in Deck.cards
-        different[c1, c2]
-    }
+    different[Deck.cards]
 }
 
 // Check for wellformed hands
 pred wellformed_hands {
-    -- Check that each hand is wellformed
+    -- Check that each hand has 2 cards
+    all h: Hand | {
+        #{h.hcards} = 2
+    }
     -- Check that the cards between hands are different
     all disj h1, h2: Hand | {
-        different[h1.card1, h2.card1]
-        different[h1.card1, h2.card2]
-        different[h1.card2, h2.card1]
-        different[h1.card2, h2.card2]
+        #{h1.hcards & h2.hcards} = 0
     }
     -- Check that the cards are not dealt on the table
     all h: Hand | {
-        h.card1 not in Table.dealt
-        h.card2 not in Table.dealt
+        h.hcards not in Table.dealt
     }
 }
 
 // Check for wellformed table
 pred wellformed_table {
+    -- Check that the table has a valid number of cards
     #{c : Card | c in Table.dealt} > 2
     #{c : Card | c in Table.dealt} < 6
     -- Check for no duplicate cards
-    all disj c1, c2: Card | {
-        (c1 in Table.dealt and c2 in Table.dealt) => different[c1, c2]
-    }
+    different[Table.dealt]
 }
 
 // Deal cards to each player
@@ -146,6 +155,39 @@ pred flop {
     #{c : Card | c in Table.dealt} = 3
     wellformed_table
 }
+
+// Deal a new card to the table
+pred draw {
+    some c: Card | {
+        c in Deck.cards
+        Table.dealt' = Table.dealt + c
+        Deck.cards' = Deck.cards - c
+    }
+    wellformed_table
+    Hand.hcards' = Hand.hcards
+}
+
+// Determine the winning hand
+// pred winner[mh: Hand] {
+//     // high_card_win
+//     pair_win
+// }
+
+// pred high_card_win {
+//     all h: Hand | {
+//         h != mh => {
+//         highest_card[mh].rank > highest_card[h].rank
+//         }
+//     } 
+// }
+
+// pred pair_win {
+//     -- Only one hand forms a pair
+//     // #{h: Hand | h.card1.rank = h.card2.rank} = 1
+//     one h: Hand | {
+//         h.card1.rank = h.card2.rank
+//     }
+// }
 
 // Set the cards in the deck
 pred Values {
@@ -212,12 +254,26 @@ pred Values {
     SK.suit = 4 and SK.rank = 13
 }
 
+// No changes to the game
+pred DoNothing {
+    Deck.cards' = Deck.cards
+    Hand.hcards' = Hand.hcards
+    Table.dealt' = Table.dealt
+}
+
 // Initialize the game
 pred init {
     wellformed_deck
     Values
     flop
     deal[3]
+    // winner
 }
 
-run {init} for 7 Int
+pred traces {
+    init
+    always (draw until #{c : Card | c in Table.dealt} = 5) or DoNothing
+    // eventually reset
+}
+
+run {traces} for 7 Int
