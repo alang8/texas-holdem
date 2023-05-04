@@ -167,14 +167,6 @@ pred draw {
     Hand.hcards' = Hand.hcards
 }
 
-// pred high_card_win {
-//     all h: Hand | {
-//         h != mh => {
-//         highest_card[mh].rank > highest_card[h].rank
-//         }
-//     } 
-// }
-
 pred pair_win {
     some h: Hand | {
         -- A pair is formed within a hand OR
@@ -188,10 +180,169 @@ pred pair_win {
     }
 }
 
+pred two_pair_win {
+    some h: Hand | {
+        -- A pair is formed within a hand OR
+        -- A pair is formed between a hand and the table
+        some disj c1, c2, c3, c4 : Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c1.rank = c2.rank
+            c3.rank = c4.rank
+            c1.rank != c3.rank
+        }
+        // different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred three_kind_win {
+    some h: Hand | {
+        -- A triplet is formed between a hand and the table
+        some disj c1, c2, c3 : Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c1.rank = c2.rank
+            c2.rank = c3.rank
+        }
+        different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred straight_win {
+    some h: Hand | {
+        -- Five cards have consecutive ranks between a hand and the table
+        some disj c1, c2, c3, c4, c5: Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c5 in h.hcards + Table.dealt
+            c5.rank = add[c4.rank, 1]
+            c4.rank = add[c3.rank, 1]
+            c3.rank = add[c2.rank, 1]
+            c2.rank = add[c1.rank, 1]
+        }
+        different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred flush_win {
+    some h: Hand | {
+        -- Five cards have the same suit between a hand and the table
+        some disj c1, c2, c3, c4, c5: Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c5 in h.hcards + Table.dealt
+            c1.suit = c2.suit
+            c2.suit = c3.suit
+            c3.suit = c4.suit
+            c4.suit = c5.suit
+        }
+        different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred full_house_win {
+    some h: Hand | {
+        -- A triplet and a pair is formed between
+        -- a hand and the table
+        some disj c1, c2, c3, c4, c5 : Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c5 in h.hcards + Table.dealt
+            c1.rank = c2.rank
+            c2.rank = c3.rank
+            c4.rank = c5.rank
+            c1.rank != c4.rank
+        }
+        // different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred four_kind_win {
+    some h: Hand | {
+        -- A quadruplet is formed between a hand and the table
+        some disj c1, c2, c3, c4 : Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c1.rank = c2.rank
+            c2.rank = c3.rank
+            
+            c3.rank = c4.rank
+        }
+        different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+pred straight_flush_win {
+    some h: Hand | {
+        -- Five cards have consecutive ranks between a hand and the table
+        -- These five cards are also of the same suit
+        some disj c1, c2, c3, c4, c5: Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c5 in h.hcards + Table.dealt
+            c5.rank = add[c4.rank, 1]
+            c4.rank = add[c3.rank, 1]
+            c3.rank = add[c2.rank, 1]
+            c2.rank = add[c1.rank, 1]
+            c1.suit = c2.suit
+            c2.suit = c3.suit
+            c3.suit = c4.suit
+            c4.suit = c5.suit
+        }
+        different[Deck.cards + h.hcards + Table.dealt]    
+    }
+    (Card in Hand.hcards + Table.dealt) => (Card not in Deck.cards)
+}
+
+pred royal_flush_win {
+    some h: Hand | {
+        -- Five cards A, K, Q, J, 10 between a hand and the table
+        -- These five cards are also of the same suit
+        some disj c1, c2, c3, c4, c5: Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c3 in h.hcards + Table.dealt
+            c4 in h.hcards + Table.dealt
+            c5 in h.hcards + Table.dealt
+            c5.rank = 13
+            c4.rank = 12
+            c3.rank = 11
+            c2.rank = 10
+            c1.rank = 1
+            c1.suit = c2.suit
+            c2.suit = c3.suit
+            c3.suit = c4.suit
+            c4.suit = c5.suit
+        }
+        // different[Deck.cards + h.hcards + Table.dealt]    
+    }
+    (Card in Hand.hcards + Table.dealt) => (Card not in Deck.cards)
+}
+
 // Determine the winning hand
 pred winner {
-    // high_card_win
-    pair_win
+    // pair_win
+    // two_pair_win
+    // three_kind_win
+    // straight_win
+    // flush_win
+    // full_house_win
+    // four_kind_win
+    // straight_flush_win
+    royal_flush_win
 }
 
 // Set the cards in the deck
@@ -271,7 +422,7 @@ pred init {
     wellformed_deck
     Values
     flop
-    deal[3]
+    deal[4]
     winner
 }
 
