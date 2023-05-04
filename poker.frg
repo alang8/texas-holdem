@@ -95,7 +95,7 @@ one sig Deck {
 
 -- Game operations
 
-// What makes two cards different
+// What makes a set of cards different
 pred different[cards: set Card] {
     all disj c1, c2: cards | {
         c1.suit != c2.suit or c1.rank != c2.rank
@@ -167,12 +167,6 @@ pred draw {
     Hand.hcards' = Hand.hcards
 }
 
-// Determine the winning hand
-// pred winner[mh: Hand] {
-//     // high_card_win
-//     pair_win
-// }
-
 // pred high_card_win {
 //     all h: Hand | {
 //         h != mh => {
@@ -181,13 +175,24 @@ pred draw {
 //     } 
 // }
 
-// pred pair_win {
-//     -- Only one hand forms a pair
-//     // #{h: Hand | h.card1.rank = h.card2.rank} = 1
-//     one h: Hand | {
-//         h.card1.rank = h.card2.rank
-//     }
-// }
+pred pair_win {
+    some h: Hand | {
+        -- A pair is formed within a hand OR
+        -- A pair is formed between a hand and the table
+        some disj c1, c2 : Card | {
+            c1 in h.hcards + Table.dealt
+            c2 in h.hcards + Table.dealt
+            c1.rank = c2.rank
+        }
+        different[Deck.cards + h.hcards + Table.dealt]
+    }
+}
+
+// Determine the winning hand
+pred winner {
+    // high_card_win
+    pair_win
+}
 
 // Set the cards in the deck
 pred Values {
@@ -267,12 +272,12 @@ pred init {
     Values
     flop
     deal[3]
-    // winner
+    winner
 }
 
 pred traces {
     init
-    always (draw until #{c : Card | c in Table.dealt} = 5) or DoNothing
+    // always (draw until #{c : Card | c in Table.dealt} = 5) or DoNothing
     // eventually reset
 }
 
