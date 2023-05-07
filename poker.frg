@@ -1,25 +1,11 @@
 #lang forge
 
-option problem_type temporal
-option max_tracelength 15
-
 -- Definitions
 
 abstract sig Card {
     suit: one Int,
     rank: one Int
 }
-
-// abstract sig Rank {}
-// one sig Two, Three, Four, Five, Six, Seven, Nine, Ten, Jack, Queen, King, Ace extends Rank {}
- 
-// abstract sig Suit {}
-// one sig Clubs, Diamonds, Hearts, Spades extends Suit {}
-
-// sig Card {
-//     suit: one Rank,
-//     rank: one Suit
-// }
 
 // Hearts
 one sig HA extends Card {}
@@ -82,217 +68,201 @@ one sig SQ extends Card {}
 one sig SK extends Card {}
 
 sig Hand {
-    hcards: set Card
-}
-
-one sig Table {
-    dealt: set Card
-}
-
-one sig Deck {
     cards: set Card
+}
+
+sig Turn {
+    hands: set Hand,
+    table: set Card,
+    deck: set Card,
+    next: lone Turn
 }
 
 -- Game operations
 
 // What makes a set of cards different
-pred different[cards: set Card] {
-    all disj c1, c2: cards | {
+pred different[cs: set Card] {
+    all disj c1, c2: cs | {
         c1.suit != c2.suit or c1.rank != c2.rank
     }
 }
 
-// Get the highest card from a hand
-// fun highest_card[h: Hand] : Card {
-//     h.card1.rank > h.card2.rank => h.card1
-//     h.card2.rank > h.card1.rank => h.card2
-//     h.card1.rank = h.card2.rank => h.card1
-// }
-
 // Check for wellformed deck
-pred wellformed_deck {
-    -- Check that the cards in hands/table are not in the deck
-    all c: Card - Hand.hcards - Table.dealt | {
-        c in Deck.cards 
-    }
-    -- Check for no duplicate cards
-    different[Deck.cards]
+pred wellformed_deck[t: Turn] {
+    -- Check that the cards in the deck = those not in the hands or table
+    t.deck = Card - t.hands.cards - t.table
 }
 
 // Check for wellformed hands
-pred wellformed_hands {
-    -- Check that each hand has 2 cards
-    all h: Hand | {
-        #{h.hcards} = 2
+pred wellformed_hands[t: Turn] {
+    -- Check that each hand has two cards
+    all h: t.hands | {
+        #{h.cards} = 2
     }
-    -- Check that the cards between hands are different
-    all disj h1, h2: Hand | {
-        #{h1.hcards & h2.hcards} = 0
+    -- Check for no duplicate cards
+    all disj h1, h2: t.hands | {
+        #{h1.cards & h2.cards} = 0
     }
-    -- Check that the cards are not dealt on the table
-    all h: Hand | {
-        h.hcards not in Table.dealt
+    -- Check that cards in hand are not in the table
+    all h: t.hands | {
+        all c: h.cards | {
+            c not in t.table
+        }
     }
 }
 
 // Check for wellformed table
-pred wellformed_table {
+pred wellformed_table[t: Turn] {
     -- Check that the table has a valid number of cards
-    #{c : Card | c in Table.dealt} > 2
-    #{c : Card | c in Table.dealt} < 6
+    #{c : Card | c in t.table} > 2
+    #{c : Card | c in t.table} < 6
     -- Check for no duplicate cards
-    different[Table.dealt]
+    different[t.table]
+}
+
+pred wellformed[t: Turn] {
+    wellformed_deck[t]
+    wellformed_hands[t]
+    wellformed_table[t]
 }
 
 // Deal cards to each player
-pred deal[num_players: Int] {
-    #{Hand} = num_players
-    wellformed_hands
+pred deal[t: Turn, num_players: Int] {
+    #{t.hands} = num_players
 }
 
 // Flop the first three cards
-pred flop {
-    #{c : Card | c in Table.dealt} = 3
-    wellformed_table
+pred flop[t: Turn] {
+    #{c : Card | c in t.table} = 3
 }
 
 // Deal a new card to the table
-pred draw {
-    some c: Card | {
-        c in Deck.cards
-        Table.dealt' = Table.dealt + c
-        Deck.cards' = Deck.cards - c
+pred draw[pre: Turn, post: Turn] {
+    some c: pre.deck | {
+        post.table = pre.table + c
+        post.deck = pre.deck - c
     }
-    wellformed_table
-    Hand.hcards' = Hand.hcards
+    pre.hands = post.hands
 }
 
-pred pair_win {
-    some h: Hand | {
+pred pair_win[t: Turn] {
+    some h: t.hands | {
         -- A pair is formed within a hand OR
         -- A pair is formed between a hand and the table
         some disj c1, c2 : Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
             c1.rank = c2.rank
         }
-        different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred two_pair_win {
-    some h: Hand | {
+pred two_pair_win[t: Turn] {
+    some h: t.hands | {
         -- A pair is formed within a hand OR
         -- A pair is formed between a hand and the table
         some disj c1, c2, c3, c4 : Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
             c1.rank = c2.rank
             c3.rank = c4.rank
             c1.rank != c3.rank
         }
-        // different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred three_kind_win {
-    some h: Hand | {
+pred three_kind_win[t: Turn] {
+    some h: t.hands | {
         -- A triplet is formed between a hand and the table
         some disj c1, c2, c3 : Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
             c1.rank = c2.rank
             c2.rank = c3.rank
         }
-        different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred straight_win {
-    some h: Hand | {
+pred straight_win[t: Turn] {
+    some h: t.hands | {
         -- Five cards have consecutive ranks between a hand and the table
         some disj c1, c2, c3, c4, c5: Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
-            c5 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
+            c5 in h.cards + t.table
             c5.rank = add[c4.rank, 1]
             c4.rank = add[c3.rank, 1]
             c3.rank = add[c2.rank, 1]
             c2.rank = add[c1.rank, 1]
         }
-        different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred flush_win {
-    some h: Hand | {
+pred flush_win[t: Turn] {
+    some h: t.hands | {
         -- Five cards have the same suit between a hand and the table
         some disj c1, c2, c3, c4, c5: Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
-            c5 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
+            c5 in h.cards + t.table
             c1.suit = c2.suit
             c2.suit = c3.suit
             c3.suit = c4.suit
             c4.suit = c5.suit
         }
-        different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred full_house_win {
-    some h: Hand | {
+pred full_house_win[t: Turn] {
+    some h: t.hands | {
         -- A triplet and a pair is formed between
         -- a hand and the table
         some disj c1, c2, c3, c4, c5 : Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
-            c5 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
+            c5 in h.cards + t.table
             c1.rank = c2.rank
             c2.rank = c3.rank
             c4.rank = c5.rank
             c1.rank != c4.rank
         }
-        // different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred four_kind_win {
-    some h: Hand | {
+pred four_kind_win[t: Turn] {
+    some h: t.hands | {
         -- A quadruplet is formed between a hand and the table
         some disj c1, c2, c3, c4 : Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
             c1.rank = c2.rank
             c2.rank = c3.rank
-            
             c3.rank = c4.rank
         }
-        different[Deck.cards + h.hcards + Table.dealt]
     }
 }
 
-pred straight_flush_win {
-    some h: Hand | {
+pred straight_flush_win[t: Turn] {
+    some h: t.hands | {
         -- Five cards have consecutive ranks between a hand and the table
         -- These five cards are also of the same suit
         some disj c1, c2, c3, c4, c5: Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
-            c5 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
+            c5 in h.cards + t.table
             c5.rank = add[c4.rank, 1]
             c4.rank = add[c3.rank, 1]
             c3.rank = add[c2.rank, 1]
@@ -302,21 +272,19 @@ pred straight_flush_win {
             c3.suit = c4.suit
             c4.suit = c5.suit
         }
-        different[Deck.cards + h.hcards + Table.dealt]    
     }
-    (Card in Hand.hcards + Table.dealt) => (Card not in Deck.cards)
 }
 
-pred royal_flush_win {
-    some h: Hand | {
+pred royal_flush_win[t: Turn] {
+    some h: t.hands | {
         -- Five cards A, K, Q, J, 10 between a hand and the table
         -- These five cards are also of the same suit
         some disj c1, c2, c3, c4, c5: Card | {
-            c1 in h.hcards + Table.dealt
-            c2 in h.hcards + Table.dealt
-            c3 in h.hcards + Table.dealt
-            c4 in h.hcards + Table.dealt
-            c5 in h.hcards + Table.dealt
+            c1 in h.cards + t.table
+            c2 in h.cards + t.table
+            c3 in h.cards + t.table
+            c4 in h.cards + t.table
+            c5 in h.cards + t.table
             c5.rank = 13
             c4.rank = 12
             c3.rank = 11
@@ -327,22 +295,20 @@ pred royal_flush_win {
             c3.suit = c4.suit
             c4.suit = c5.suit
         }
-        // different[Deck.cards + h.hcards + Table.dealt]    
     }
-    (Card in Hand.hcards + Table.dealt) => (Card not in Deck.cards)
 }
 
 // Determine the winning hand
-pred winner {
-    // pair_win
-    // two_pair_win
-    // three_kind_win
-    // straight_win
-    // flush_win
-    // full_house_win
-    // four_kind_win
-    // straight_flush_win
-    royal_flush_win
+pred winner[t: Turn] {
+    // pair_win[t]
+    // two_pair_win[t]
+    // three_kind_win[t]
+    // straight_win[t]
+    // flush_win[t]
+    // full_house_win[t]
+    // four_kind_win[t]
+    // straight_flush_win[t]
+    royal_flush_win[t]
 }
 
 // Set the cards in the deck
@@ -410,26 +376,35 @@ pred Values {
     SK.suit = 4 and SK.rank = 13
 }
 
-// No changes to the game
-pred DoNothing {
-    Deck.cards' = Deck.cards
-    Hand.hcards' = Hand.hcards
-    Table.dealt' = Table.dealt
+// Initialize the game
+pred init[t: turn] {
+    flop[t]
+    // Change this to set number of players
+    deal[t, 4]
 }
 
-// Initialize the game
-pred init {
-    wellformed_deck
-    Values
-    flop
-    deal[4]
-    winner
+// End of the game
+pred final[t: turn] {
+    #{t.table} = 5
+    // Change this to set number of players
+    #{t.hands} = 4
+    // The win will happen on the last turn
+    winner[t]
 }
 
 pred traces {
-    init
-    // always (draw until #{c : Card | c in Table.dealt} = 5) or DoNothing
-    // eventually reset
+    some i, f: Turn | {
+        init[i]
+        final[f]
+        reachable[f, i, next]
+    }
+    all t: Turn | some t.next => {
+        draw[t, t.next]
+    }
 }
 
-run {traces} for 7 Int
+run {
+    all t: Turn | wellformed[t]
+    traces
+    Values
+} for exactly 3 Turn, 7 Int for {next is linear}
