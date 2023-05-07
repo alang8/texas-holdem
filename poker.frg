@@ -75,6 +75,7 @@ sig Turn {
     hands: set Hand,
     table: set Card,
     deck: set Card,
+    folds: set Hand,
     next: lone Turn
 }
 
@@ -134,15 +135,6 @@ pred deal[t: Turn, num_players: Int] {
 // Flop the first three cards
 pred flop[t: Turn] {
     #{c : Card | c in t.table} = 3
-}
-
-// Deal a new card to the table
-pred draw[pre: Turn, post: Turn] {
-    some c: pre.deck | {
-        post.table = pre.table + c
-        post.deck = pre.deck - c
-    }
-    pre.hands = post.hands
 }
 
 pred pair_win[t: Turn] {
@@ -298,6 +290,10 @@ pred royal_flush_win[t: Turn] {
     }
 }
 
+pred fold_win[t: Turn] {
+    #{t.folds} = 3
+}
+
 // Determine the winning hand
 pred winner[t: Turn] {
     // pair_win[t]
@@ -308,7 +304,74 @@ pred winner[t: Turn] {
     // full_house_win[t]
     // four_kind_win[t]
     // straight_flush_win[t]
-    royal_flush_win[t]
+    // royal_flush_win[t]
+    fold_win[t]
+}
+
+pred algo1[h: Hand] {
+    some c1, c2: Card | {
+        c1 in h.cards 
+        c2 in h.cards
+        // When X≤6, any hand except「X+X」or「X+A」should be folded
+        (c1.rank <= 6) and (c1.rank != c2.rank) and (c2.rank != 1)
+    }
+}
+
+pred algo2[h: Hand] {
+    some c1, c2: Card | {
+        c1 in h.cards 
+        c2 in h.cards
+        // Any hand with seven, except「7+7」,「7+A」or「7+8」should be folded
+        (c1.rank = 7) and (c2.rank != 7) and (c2.rank != 1) and (c2.rank != 8)
+    }
+}
+
+pred algo3[h: Hand] {
+    some c1, c2: Card | {
+        c1 in h.cards 
+        c2 in h.cards
+        // Any hand with eight, except「8+8」,「8+A」,「8+7」,「8+9」or「8+10」should be folded
+        (c1.rank = 8) and (c2.rank != 1) and (c2.rank != 7) and (c2.rank != 8) and (c2.rank != 9) and (c2.rank != 10)
+    }
+}
+
+pred algo4[h: Hand] {
+    some c1, c2: Card | {
+        c1 in h.cards 
+        c2 in h.cards
+        // When X≤7, any hand with「X+9」should be also folded
+        (c1.rank <= 7) and (c2.rank = 9)
+    }
+}
+
+pred algo5[cs: set Card] {
+    some c1, c2: Card | {
+        c1 in cs
+        c2 in cs
+        // There is a pair within your hand
+        // or with a card in your hand and the table
+        c1.rank = c2.rank
+    }
+}
+
+// Determine which hands fold at a given turn
+pred fold[pre: Turn, post: Turn] {
+    all h: Hand | {
+        h in pre.hands
+        // Simple poker folding algorithm
+        {(algo1[h] or algo2[h] or algo3[h] or algo4[h] or h in pre.folds) and (algo5[h.cards + pre.table]) => 
+        (h in post.folds) else (h not in post.folds)}
+    }
+    pre.hands = post.hands
+}
+
+// Deal a new card to the table
+pred draw[pre: Turn, post: Turn] {
+    some c: pre.deck | {
+        post.table = pre.table + c
+        post.deck = pre.deck - c
+    }
+    pre.hands = post.hands
 }
 
 // Set the cards in the deck
@@ -381,6 +444,9 @@ pred init[t: turn] {
     flop[t]
     // Change this to set number of players
     deal[t, 4]
+    // At least one player folds, but not all
+    // #{t.folds} > 0
+    // #{t.folds} < 4
 }
 
 // End of the game
@@ -392,6 +458,7 @@ pred final[t: turn] {
     winner[t]
 }
 
+// Run through the states of the game
 pred traces {
     some i, f: Turn | {
         init[i]
@@ -399,7 +466,8 @@ pred traces {
         reachable[f, i, next]
     }
     all t: Turn | some t.next => {
-        draw[t, t.next]
+        fold[t, t.next]
+        draw[t, t.next]   
     }
 }
 
