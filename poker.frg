@@ -133,7 +133,7 @@ pred flop[t: Turn] {
 }
 
 pred pair_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- A pair is formed within a hand OR
         -- A pair is formed between a hand and the table
         some disj c1, c2 : Card | {
@@ -145,7 +145,7 @@ pred pair_win[t: Turn] {
 }
 
 pred two_pair_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- A pair is formed within a hand OR
         -- A pair is formed between a hand and the table
         some disj c1, c2, c3, c4 : Card | {
@@ -161,7 +161,7 @@ pred two_pair_win[t: Turn] {
 }
 
 pred three_kind_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- A triplet is formed between a hand and the table
         some disj c1, c2, c3 : Card | {
             c1 in h.cards + t.table
@@ -174,7 +174,7 @@ pred three_kind_win[t: Turn] {
 }
 
 pred straight_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- Five cards have consecutive ranks between a hand and the table
         some disj c1, c2, c3, c4, c5: Card | {
             c1 in h.cards + t.table
@@ -191,7 +191,7 @@ pred straight_win[t: Turn] {
 }
 
 pred flush_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- Five cards have the same suit between a hand and the table
         some disj c1, c2, c3, c4, c5: Card | {
             c1 in h.cards + t.table
@@ -208,7 +208,7 @@ pred flush_win[t: Turn] {
 }
 
 pred full_house_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- A triplet and a pair is formed between
         -- a hand and the table
         some disj c1, c2, c3, c4, c5 : Card | {
@@ -226,7 +226,7 @@ pred full_house_win[t: Turn] {
 }
 
 pred four_kind_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- A quadruplet is formed between a hand and the table
         some disj c1, c2, c3, c4 : Card | {
             c1 in h.cards + t.table
@@ -241,7 +241,7 @@ pred four_kind_win[t: Turn] {
 }
 
 pred straight_flush_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- Five cards have consecutive ranks between a hand and the table
         -- These five cards are also of the same suit
         some disj c1, c2, c3, c4, c5: Card | {
@@ -263,7 +263,7 @@ pred straight_flush_win[t: Turn] {
 }
 
 pred royal_flush_win[t: Turn] {
-    some h: t.hands - t.folds | {
+    some h: t.hands | {
         -- Five cards A, K, Q, J, 10 between a hand and the table
         -- These five cards are also of the same suit
         some disj c1, c2, c3, c4, c5: Card | {
@@ -354,12 +354,9 @@ pred fold[pre: Turn, post: Turn] {
     all h: Hand | {
         h in pre.hands
         // Simple poker folding algorithm
-        // {(algo1[h] or algo2[h] or algo3[h] or algo4[h] or h in pre.folds) and (algo5[h.cards + pre.table]) => 
-        // (h in post.folds) else (h not in post.folds)}
         {(algo1[h] or algo2[h] or algo3[h] or algo4[h]) and (algo5[h.cards + pre.table]) => 
-        (h in post.folds) else (h not in post.folds)}
+        (h in post.folds and h not in post.hands) else (h not in post.folds and h in post.hands)}
     }
-    pre.hands = post.hands
     pre.table = post.table
 }
 
@@ -444,16 +441,14 @@ pred init[t: turn] {
     // How many hands are dealt
     // Change this to set number of players
     #{t.hands} = 4
-    // At least one player folds, but not all
-    #{t.folds} = 1
-    #{t.folds} < 4
 }
 
 // End of the game
 pred final[t: turn] {
     #{t.table} = 5
-    // Change this to set number of players
-    #{t.hands} = 4
+    // At least one player folds, but not all
+    #{t.folds} > 0
+    #{t.hands} > 0
     // The win will happen on the last turn
     winner[t]
 }
@@ -466,7 +461,7 @@ pred traces {
         reachable[f, i, next]
     }
     all t: Turn | some t.next => {
-        // If a player folds, the draw is paused
+        // If a player folds, the draw is paused for that turn
         fold[t, t.next] or draw[t, t.next]   
     }
 }
