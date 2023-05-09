@@ -1,3 +1,5 @@
+const card = Card
+
 function make_card(url) {
     const img = document.createElement('img')
     img.src = url
@@ -29,22 +31,26 @@ do {
     const post = state.join(next)
     
     // takes in a set of cards and makes them
-    function make_table(table) {
-        for (const card of table) {
-            div.appendChild(make_card(card))
-        }
-    }
+    // function make_table(table) {
+    //     for (const card of table) {
+    //         div.appendChild(make_card(card))
+    //     }
+    // }
 
-    const table = make_table(pre.table)    
+    // const table = make_table(pre.table)    
 
-    const div = document.createElement('div')
-    div.style.width = '100%'
-    div.style.height = '100%'
-    div.style.display = 'flex'
-    div.style['flex-direction'] = 'column'
-    div.style['justify-content'] = 'center'
-    div.style['align-items'] = 'center'
-    div.style['background-color'] = 'green'
+    const board = document.createElement('board')
+    board.style.width = '50%'
+    board.style.height = '50%'
+    board.style.margin = '1%'
+    board.style.marginRight = '0'
+    board.style.padding = '0.5em'
+    board.style.border = '5px solid black'
+    board.style.display = 'inline-block'
+    board.style.color = 'white'
+    board.style["background-color"] = '#35654d'
+
+    div.appendChild(board)
 
     state = state.join(next);
     i++;
