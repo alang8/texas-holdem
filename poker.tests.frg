@@ -971,10 +971,10 @@ test suite for fold {
         Hand = `Hand0 + `Hand1 + `Hand2 + `Hand3
         --Adding Hands to the Turns
         hands = `pre -> `Hand0 + `pre -> `Hand1 + `pre -> `Hand2 + `pre -> `Hand3 +
-                `post -> `Hand0 + `post -> `Hand1 + `post -> `Hand2 + `post -> `Hand3
+                `post -> `Hand3
         --Adding Cards to the table for the Turns
         table = `pre -> HQ + `pre -> HJ + `pre -> H10 +
-                `post -> HQ + `post -> HJ + `post -> H10 + `post -> DA
+                `post -> HQ + `post -> HJ + `post -> H10
         --Adding Cards to the Hands for this turn
         cards = `Hand0 -> S5 + `Hand0 -> S8 +
                 `Hand1 -> H7 + `Hand1 -> H9 + 
@@ -1053,10 +1053,10 @@ test suite for fold {
         Hand = `Hand0 + `Hand1 + `Hand2 + `Hand3
         --Adding Hands to the Turns
         hands = `pre -> `Hand0 + `pre -> `Hand1 + `pre -> `Hand2 + `pre -> `Hand3 +
-                `post -> `Hand0 + `post -> `Hand1 + `post -> `Hand2 + `post -> `Hand3
+                `post -> `Hand3
         --Adding Cards to the table for the Turns
         table = `pre -> HQ + `pre -> HJ + `pre -> H10 +
-                `post -> HQ + `post -> HJ + `post -> H10 + `post -> DA
+                `post -> HQ + `post -> HJ + `post -> H10
         --Adding Cards to the Hands for this turn
         cards = `Hand0 -> S5 + `Hand0 -> S8 +
                 `Hand1 -> H7 + `Hand1 -> H9 + 
@@ -1135,10 +1135,10 @@ test suite for fold {
         Hand = `Hand0 + `Hand1 + `Hand2 + `Hand3
         --Adding Hands to the Turns
         hands = `pre -> `Hand0 + `pre -> `Hand1 + `pre -> `Hand2 + `pre -> `Hand3 +
-                `post -> `Hand0 + `post -> `Hand1 + `post -> `Hand2 + `post -> `Hand3
+                `post -> `Hand3
         --Adding Cards to the table for the Turns
         table = `pre -> HQ + `pre -> HJ + `pre -> H10 +
-                `post -> HQ + `post -> HJ + `post -> H10 + `post -> DA
+                `post -> HQ + `post -> HJ + `post -> H10
         --Adding Cards to the Hands for this turn
         cards = `Hand0 -> S5 + `Hand0 -> S8 +
                 `Hand1 -> H7 + `Hand1 -> H9 + 
