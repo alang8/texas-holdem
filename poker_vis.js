@@ -12,7 +12,6 @@ container.style.overflowY = "scroll";
 
 function getCardImage(card) {
     const name = card.toString();
-    console.log("name", name);
     if (name === "HA0") {
         return "https://www.improvemagic.com/wp-content/uploads/2020/11/sa.png";
     }
