@@ -689,7 +689,7 @@ test suite for straight_flush_win {
         straight_flush_win_is_legal: {  
             Values
             traces 
-            some turn : Turn | {striaght_flush_win[turn]}
+            some turn : Turn | {straight_flush_win[turn]}
         } for exactly 4 Turn, 7 Int for {next is linear} is sat
     }
 }
