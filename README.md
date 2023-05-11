@@ -1,5 +1,6 @@
 # texas-holdem
 **Final project for CS1710**
+
 N.B. If you decided to run our tests file, we have commented out the few tests that take the longest time to run for convenience.
 
 ## Summary
