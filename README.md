@@ -21,11 +21,3 @@ In fact, we relied on the "table" feature to confirm that our instances exhibite
 
 ## Lessons Learned
 By the end of this project, both of us had learned a significant amount about Texas Hold'em after we came into it without much experience. Initially, we learned all of the rules of the game and all the possible outcomes that could occur during a game. However, by far the most interesting information we learned was how to know when to fold our hands. Running a lot of instances during the modeling project ingrained our folding algorithm into our brains to the point that we could eyeball a hand and table and make the optimal folding decision. In fact, we learned that we should be folding more often that we had thought because of the low probability of winning with a bad hand. Collectively, this information will be useful in the future when we play the game with our friends, family, and peers at a real poker table. Completing this project may have even given us an advantage over other players that we will potentially meet.
-
-## Prompt: Delete This Later
-You should write a one page README describing how you structured your model and what your model proved. You can assume that anyone reading it will be familiar with your project proposal. Here are some examples of points you might cover:
-
-- What tradeoffs did you make in choosing your representation? 
-- What else did you try that didn’t work as well?
-- What assumptions did you make about scope? What are the limits of your model?
-- How should we understand an instance of your model and what your custom visualization shows?
