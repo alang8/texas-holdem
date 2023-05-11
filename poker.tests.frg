@@ -81,17 +81,11 @@ test suite for pair_win {
 
     // test expect {
     //     pair_win_is_legal: {  
-    //         {Values
-    //         //traces
+    //         Values
+    //         traces 
     //         some turn : Turn | {pair_win[turn]}
-    //         } implies {
-    //             all t: Turn | {
-    //                 wellformed[t]
-    //             }
-    //         } 
     //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
     // }
-
 
 }
 
@@ -174,14 +168,9 @@ test suite for two_pair_win {
 
     // test expect {
     //     two_pair_win_is_legal: {  
-    //         {Values
-    //         //traces
+    //         Values
+    //         traces 
     //         some turn : Turn | {two_pair_win[turn]}
-    //         } implies {
-    //             all t: Turn | {
-    //                 wellformed[t]
-    //             }
-    //         } 
     //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
     // }
     
@@ -262,6 +251,15 @@ test suite for three_kind_win {
                 `Hand1 -> H6 + `Hand1 -> H7 + 
                 `Hand2 -> H8 + `Hand2 -> H9
     }
+
+    // test expect {
+    //     three_kind_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {three_kind_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
+
 }
 
 test suite for straight_win {
@@ -340,6 +338,15 @@ test suite for straight_win {
                 `Hand1 -> H6 + `Hand1 -> H7 + 
                 `Hand2 -> S6 + `Hand2 -> D10
     }
+
+
+    // test expect {
+    //     straight_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {straight_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 test suite for flush_win {
@@ -418,6 +425,14 @@ test suite for flush_win {
                 `Hand1 -> H6 + `Hand1 -> H7 + 
                 `Hand2 -> S6 + `Hand2 -> D10
     }
+
+    // test expect {
+    //     flush_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {flush_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 test suite for full_house_win {
@@ -496,6 +511,14 @@ test suite for full_house_win {
                 `Hand1 -> H6 + `Hand1 -> H7 + 
                 `Hand2 -> S6 + `Hand2 -> D10
     }
+
+    // test expect {
+    //     full_house_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {full_house_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 test suite for four_kind_win {
@@ -574,6 +597,15 @@ test suite for four_kind_win {
                 `Hand1 -> H6 + `Hand1 -> D7 + 
                 `Hand2 -> SK + `Hand2 -> CK
     }
+
+
+    // test expect {
+    //     four_kind_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {four_kind_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 test suite for straight_flush_win {
@@ -652,6 +684,14 @@ test suite for straight_flush_win {
                 `Hand1 -> H6 + `Hand1 -> H7 + 
                 `Hand2 -> SK + `Hand2 -> CK
     }
+
+    // test expect {
+    //     straight_flush_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {striaght_flush_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 test suite for royal_flush_win {
@@ -730,6 +770,15 @@ test suite for royal_flush_win {
                 `Hand1 -> HK + `Hand1 -> HA + 
                 `Hand2 -> SK + `Hand2 -> CK
     }
+
+
+    // test expect {
+    //     royal_flush_win_is_legal: {  
+    //         Values
+    //         traces 
+    //         some turn : Turn | {royal_flush_win[turn]}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is sat
+    // }
 }
 
 
@@ -885,6 +934,13 @@ test suite for wellformed {
                 `Hand1 -> H6 + `Hand1 -> D7 + 
                 `Hand2 -> SK + `Hand2 -> D8
     }
+
+    // test expect {
+    //     alwayswellformed: {
+    //         {Values and traces} => {some t :Turn | {final[t]}}
+    //     } for exactly 4 Turn, 7 Int for {next is linear} is theorem
+    // }
+
 }
 
 
