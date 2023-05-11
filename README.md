@@ -1,8 +1,13 @@
 # texas-holdem
 **Final project for CS1710**
 
+N.B. If you decided to run our tests file, we have commented out the few tests that take the longest time to run for convenience.
+
 ## Summary
 For this project, we chose to model the game of Texas Hold'em. We created a Forge model that simulates a full game, from the initial flop and dealing of cards to each player to the final card being drawn to the table with a winner decided. Alongside this model, we created a custom visualization that shows the state of the game at each turn. The overall goal of this project was to learn the inner workings of this card game through modeling and testing, and to take this knowledge beyond this class in the future, as poker is a popular game that we will encounter frequently in our lives.
+
+## The Model
+Our model contains a sig for each of the 52 cards in a deck, which later helps us with the visualization because we have an image link for each card. We also have a Hand sig that is a set of (2) cards and will hold the cards of each player. Our Turn sig is the main component in our model as it keeps track of the hands, table, deck, and folded hands during each state of the game. To maintain wellformed-ness, we created predicates to check that the hands, table, and deck were behaving properly during a given turn. We also have predicates that cover the possible operations in a game, including drawing and folding (based on a comple algorithm that we coded). Finally, we have predicates that detail the possible ways of winning the game, and these can be commented in and out as necessary. Our traces predicate ensures that there is an initial and final turn that are reachable, with folding or drawing happening at each turn for a total of 4 turns.
 
 ## Adaptations
 As we got further into the creation of our model, several of the goals we initially set out with changed as we learned more about our topic. For example, when we proposed our project, the defining difference between our target goal and reach goal was the number of players we'd be able to add to the game. As we coded, we discovered that adding players would not be the challenge we thought. Our goals then shifted from player addition to developing the transitions between states of the game. We started out using temporal forge but after much experimentation, we decided the non-temporal forge served our purposes better. With a game like Texas Hold 'em, the relatively small number of states made using traces more feasible.
