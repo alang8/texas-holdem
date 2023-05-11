@@ -1,5 +1,6 @@
 # texas-holdem
 **Final project for CS1710**
+N.B. If you decided to run our tests file, we have commented out the few tests that take the longest time to run for convenience.
 
 ## Summary
 For this project, we chose to model the game of Texas Hold'em. We created a Forge model that simulates a full game, from the initial flop and dealing of cards to each player to the final card being drawn to the table with a winner decided. Alongside this model, we created a custom visualization that shows the state of the game at each turn. The overall goal of this project was to learn the inner workings of this card game through modeling and testing, and to take this knowledge beyond this class in the future, as poker is a popular game that we will encounter frequently in our lives.
