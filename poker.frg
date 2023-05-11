@@ -295,8 +295,8 @@ pred winner[t: Turn] {
     // two_pair_win[t]
     // three_kind_win[t]
     // straight_win[t]
-    // flush_win[t]
-    full_house_win[t]
+    flush_win[t]
+    // full_house_win[t]
     // four_kind_win[t]
     // straight_flush_win[t]
     // royal_flush_win[t]
@@ -339,13 +339,17 @@ pred algo4[h: Hand] {
     }
 }
 
-pred algo5[cs: set Card] {
+pred algo5[h: Hand, t: set Card] {
     some c1, c2: Card | {
-        c1 in cs
-        c2 in cs
+        c1 in h
+        c2 in h
         // There is a pair within your hand
-        // or with a card in your hand and the table
         c1.rank = c2.rank
+        // or with a card in your hand and the table
+        some c: Card | {
+            c in t
+            c.rank = c1.rank
+        }
     }
 }
 
@@ -353,8 +357,8 @@ pred algo5[cs: set Card] {
 pred fold[pre: Turn, post: Turn] {
     all h: Hand | {
         h in pre.hands
-        // Simple poker folding algorithm
-        {(algo1[h] or algo2[h] or algo3[h] or algo4[h]) and (algo5[h.cards + pre.table]) => 
+        // Custom poker folding algorithm
+        {(algo1[h] or algo2[h] or algo3[h] or algo4[h]) and (not algo5[h.cards, pre.table]) => 
         (h in post.folds and h not in post.hands) else (h not in post.folds and h in post.hands)}
     }
     pre.table = post.table
@@ -446,8 +450,7 @@ pred init[t: turn] {
 // End of the game
 pred final[t: turn] {
     #{t.table} = 5
-    // At least one player folds, but not all
-    #{t.folds} = 1
+    // Not all players fold
     #{t.hands} > 0
     // The win will happen on the last turn
     winner[t]

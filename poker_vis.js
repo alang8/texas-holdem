@@ -129,7 +129,7 @@ function getCardImage(card) {
     else if (name === "DK0") {
         return "https://www.improvemagic.com/wp-content/uploads/2020/11/lk.png";
     }
-    else if (name === "CK0") {
+    else if (name === "CA0") {
         return "https://www.improvemagic.com/wp-content/uploads/2020/11/ka.png";
     }
     else if (name === "C20") {
