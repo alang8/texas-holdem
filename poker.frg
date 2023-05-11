@@ -294,9 +294,9 @@ pred winner[t: Turn] {
     // pair_win[t]
     // two_pair_win[t]
     // three_kind_win[t]
-    straight_win[t]
-    flush_win[t]
-    // full_house_win[t]
+    // straight_win[t]
+    // flush_win[t]
+    full_house_win[t]
     // four_kind_win[t]
     // straight_flush_win[t]
     // royal_flush_win[t]
@@ -447,7 +447,7 @@ pred init[t: turn] {
 pred final[t: turn] {
     #{t.table} = 5
     // At least one player folds, but not all
-    #{t.folds} > 0
+    #{t.folds} = 1
     #{t.hands} > 0
     // The win will happen on the last turn
     winner[t]
@@ -461,7 +461,7 @@ pred traces {
         reachable[f, i, next]
     }
     all t: Turn | some t.next => {
-        // If a player folds, the draw is paused for that turn
+        // Either fold or draw on a turn
         fold[t, t.next] or draw[t, t.next]   
     }
 }
