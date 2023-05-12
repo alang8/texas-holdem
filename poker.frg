@@ -292,10 +292,10 @@ pred fold_win[t: Turn] {
 // Determine the winning hand
 pred winner[t: Turn] {
     // pair_win[t]
-    // two_pair_win[t]
+    two_pair_win[t]
     // three_kind_win[t]
     // straight_win[t]
-    flush_win[t]
+    // flush_win[t]
     // full_house_win[t]
     // four_kind_win[t]
     // straight_flush_win[t]
